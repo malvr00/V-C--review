@@ -12,6 +12,23 @@
 #define new DEBUG_NEW
 #endif
 
+// Block 모양 지정
+POINT Pattern[7][16] = {
+	{	{ 0, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 },    { 0, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 },
+		{ 0, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 },    { 0, 0 }, { 0, -1 }, { -1, 0 }, { -1, -1 } },
+	{   { 0, 0 }, { 1, 0 }, { -1, 0 }, { -2, 0 },     { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, -1 },
+		{ 0, 0 }, { 1, 0 }, { -1, 0 }, { -2, 0 },     { 0, 0 }, { 0, 1 }, { 0, 2 }, { 0, -1 } },
+	{	{ 0, 0 }, { -1, 0 }, { 0, -1 }, { 1, -1 },    { 0, 0 }, { 0, 1 }, { -1, 0 }, { -1, -1 },
+		{ 0, 0 }, { -1, 0 }, { 0, -1 }, { 1, -1 },    { 0, 0 }, { 0, 1 }, { -1, 0 }, { -1, -1 } },
+	{	{ 0, 0 }, { -1, -1 }, { 0, -1 }, { 1, 0 },    { 0, 0 }, { -1, 0 }, { -1, 1 }, { 0, -1 },
+		{ 0, 0 }, { -1, -1 }, { 0, -1 }, { 1, 0 },    { 0, 0 }, { -1, 0 }, { -1, 1 }, { 0, -1 } },
+	{	{ -1, 0 }, { -1, 1 }, { 0, 1 }, { 1, 1 },     { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 },
+		{ -1, -1 }, { 0, -1 }, { 1, -1 }, { 1, 0 },   { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 } },
+	{	{ -1, 1 }, { 0, 1 }, { 1, 1 }, { 1, 0 },       { 0, -1 }, { 1, -1 }, { 1, 0 }, { 1, 1 },
+		{ -1, 0 }, { -1, -1 }, { 0, -1 }, { 1, -1 },  { -1, 1 }, { -1, 0 }, { -1, -1 }, { 0, 1 } },
+	{	{ 0, 0 }, { -1, 0 }, { 1, 0 }, { 0, 1 },      { 0, 0 }, { 0, -1 }, { 0, 1 }, { 1, 0 },
+		{ 0, 0 }, { -1, 0 }, { 1, 0 }, { 0, -1 },     { 0, 0 }, { -1, 0 }, { 0, -1 }, { 0, 1 } }
+};
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -54,17 +71,41 @@ CtetrisGameDlg::CtetrisGameDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_TETRISGAME_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_nX = COL_CNT / 2;
+	m_nY = 0;
+	m_nPattern = 0;
+	m_nRot = 0;
+	m_bStart = FALSE;
+	m_nBitType = 4;
+	
+	// 게임진행 할 화면 지정
+	m_mainRect.left = START_X;
+	m_mainRect.top = START_Y;
+	m_mainRect.right = START_X + BLOCK_SIZE * COL_CNT + 4;
+	m_mainRect.bottom = START_Y + BLOCK_SIZE * ROW_CNT + 4;
+
+	// 다음 Block 나타날 공간
+	m_nextRect.left = START_X + BLOCK_SIZE * COL_CNT + 20;
+	m_nextRect.top = START_Y + 30;
+	m_nextRect.right = m_nextRect.left + 130;
+	m_nextRect.bottom = m_nextRect.top = 80;
 }
 
 void CtetrisGameDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON1, m_ctrlStartBt);
+	DDX_Control(pDX, IDC_BUTTON2, m_ctrlStopBt);
 }
 
 BEGIN_MESSAGE_MAP(CtetrisGameDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON1, &CtetrisGameDlg::OnClickedStartButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CtetrisGameDlg::OnClickedStopButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CtetrisGameDlg::OnClickedExitButton3)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -100,7 +141,27 @@ BOOL CtetrisGameDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	
+	// 화면 크기 지정
+	MoveWindow(100, 100, m_mainRect.right + 180, m_mainRect.bottom + 45);
+	m_pDC = GetDC();
 
+	// Block bitmap Load
+	m_bmBlock.LoadBitmap(IDB_BLOCK);
+	m_BlockDC.CreateCompatibleDC(m_pDC);
+	m_BlockDC.SelectObject(&m_bmBlock);
+
+	// BackGround bitmap Load
+	m_bmBack.LoadBitmap(IDB_BACK);
+	m_BackDC.CreateCompatibleDC(m_pDC);
+	m_BackDC.SelectObject(&m_bmBack);
+
+	srand((unsigned)time(NULL));
+	m_ctrlStartBt.EnableWindow(TRUE);
+	m_ctrlStopBt.EnableWindow(FALSE);
+
+	// 배열 -1로 초기화
+	memset((void *)m_Table, -1, sizeof(m_Table));
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -142,6 +203,7 @@ void CtetrisGameDlg::OnPaint()
 	}
 	else
 	{
+		DrawScr();
 		CDialogEx::OnPaint();
 	}
 }
@@ -153,3 +215,144 @@ HCURSOR CtetrisGameDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CtetrisGameDlg::DrawScr()
+{
+	// TODO: 여기에 구현 코드 추가.
+	int row, col;
+
+	// main 및 다음블럭 나타낼 테두리 그리기
+	m_pDC->Rectangle(m_mainRect);
+	m_pDC->Rectangle(m_nextRect);
+
+	for (row = 0; row < ROW_CNT; row++) {
+		for (col = 0; col < COL_CNT; col++) {
+			if (m_Table[row][col] == -1) {		//  '-1'이면 배경화면 그림 출력, 아니면 블럭 출력
+				m_pDC->BitBlt(START_X + 2 + col * BLOCK_SIZE, START_Y + 2 + row * BLOCK_SIZE, BLOCK_SIZE,  BLOCK_SIZE, &m_BackDC, 
+					col * BLOCK_SIZE, row * BLOCK_SIZE, SRCCOPY);
+			}
+			else {	
+				m_pDC->BitBlt(START_X + 2 + col * BLOCK_SIZE, START_Y + 2 + row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE, &m_BlockDC, 
+					m_Table[row][col] * BLOCK_SIZE, m_nBitType * BLOCK_SIZE, SRCCOPY);
+			}
+		}
+	}
+}
+
+
+void CtetrisGameDlg::InitialGame()
+{
+	// TODO: 여기에 구현 코드 추가.
+
+	// 게임시작 전 모든 data 초기화
+	memset((void*)m_Table, -1, sizeof(m_Table));
+	DrawScr();
+	m_nPattern = rand() % 7; // 패턴 랜덤하게 설정
+	m_nRot = 0;
+	m_nY = 1;
+	m_nX = COL_CNT / 2;
+	m_bStart = TRUE;
+	
+	// block 도형 그리기
+	DrawBlock(TRUE);
+	// block 타이머 작동
+	SetTimer(1, 500, NULL);
+}
+
+
+void CtetrisGameDlg::DrawBlock(bool bFlag)
+{
+	// TODO: 여기에 구현 코드 추가.
+	for (int i = 0; i < 4; i++) {
+		m_pDC->BitBlt(START_X + 2 + (m_nX + Pattern[m_nPattern][i + m_nRot * 4].x))
+	}
+}
+
+
+BOOL CtetrisGameDlg::BlockDown()
+{
+	// TODO: 여기에 구현 코드 추가.
+	return 0;
+}
+
+
+BOOL CtetrisGameDlg::IsAround(int nX, int nY)
+{
+	// TODO: 여기에 구현 코드 추가.
+	return 0;
+}
+
+
+void CtetrisGameDlg::SetTable()
+{
+	// TODO: 여기에 구현 코드 추가.
+}
+
+
+void CtetrisGameDlg::RolateBlock(bool bFlag)
+{
+	// TODO: 여기에 구현 코드 추가.
+}
+
+
+void CtetrisGameDlg::MoveDown()
+{
+	// TODO: 여기에 구현 코드 추가.
+}
+
+
+void CtetrisGameDlg::MoveRight()
+{
+	// TODO: 여기에 구현 코드 추가.
+}
+
+
+void CtetrisGameDlg::MoveLeft()
+{
+	// TODO: 여기에 구현 코드 추가.
+}
+
+
+void CtetrisGameDlg::OnClickedStartButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	InitialGame();
+	m_ctrlStartBt.EnableWindow(FALSE);
+	m_ctrlStopBt.EnableWindow(TRUE);
+	m_ctrlStopBt.SetFocus();
+}
+
+
+void CtetrisGameDlg::OnClickedStopButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_bStart = FALSE;
+	KillTimer(1);
+	m_ctrlStartBt.EnableWindow(TRUE);
+	m_ctrlStopBt.EnableWindow(FALSE);
+}
+
+
+void CtetrisGameDlg::OnClickedExitButton3()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	ReleaseDC(m_pDC);
+	OnOK();
+}
+
+
+void CtetrisGameDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+BOOL CtetrisGameDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
