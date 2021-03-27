@@ -1,6 +1,6 @@
-# This is an V/C++ review
+# This is an V/C++ Study
 
-V/C++ 까먹지 않기 위한 복습.
+V/C++ 공부하기.
 
 ## 1. PuzzleGame.
 
