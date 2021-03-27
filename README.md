@@ -1,13 +1,9 @@
 # This is an V/C++ Study
 
-V/C++ 공부하기.
+> V/C++ 공부하기.
+>   > 1단계를 기준으로 단계별로 기능을 추가할 계획이다.
 
 ## 1. PuzzleGame.
-
----
-
-1단계를 기준으로 단계별로 기능을 추가할 계획이다.
-
 ---
 ### 1단계 [코드참조](https://github.com/malvr00/V-Cplusplus-review/tree/master/puzzleGame)
   
