@@ -72,7 +72,6 @@ void CpuzzleGameDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT1, m_rowCnt);
 	DDX_Text(pDX, IDC_EDIT2, m_colCnt);
-	//  DDX_Text(pDX, IDC_EDIT5ACCURACY, m_moveCnt);
 	DDX_Text(pDX, IDC_EDITMOVE, m_moveCnt);
 	DDX_Text(pDX, IDC_EDITTIME, m_nTime);
 	DDX_Text(pDX, IDC_EDIT5ACCURACY, m_strCorect);
@@ -182,6 +181,7 @@ void CpuzzleGameDlg::OnPaint()
 	}
 	else
 	{
+		CDialogEx::OnPaint();
 		// 게임시작 성공했을 때 원본 그림 나타냄.
 		if (m_bGameClear) {
 			DisplayOriginal();
@@ -191,7 +191,6 @@ void CpuzzleGameDlg::OnPaint()
 			DisplayAll();
 			CorrectCount();
 		}
-		CDialogEx::OnPaint();
 	}
 }
 
@@ -422,7 +421,7 @@ BOOL CpuzzleGameDlg::CorrectCount()
 		}
 	}
 
-	if (m_aMap[m_colCnt - 1][m_rowCnt - 1] = -1)
+	if (m_aMap[m_colCnt - 1][m_rowCnt - 1] == -1)
 		correct++;
 	
 	// 현재 얼마나 맞췄나 나타내기.
@@ -515,7 +514,7 @@ void CpuzzleGameDlg::MovePicture(int nX, int nY, int eX, int eY, int nTime)
 		}
 	}
 	// 빈칸 좌표값 -1 넣기.
-	m_aMap[nX][nY] == -1;
+	m_aMap[nX][nY] = -1;
 }
 
 
