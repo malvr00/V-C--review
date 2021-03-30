@@ -21,7 +21,7 @@
 
 ---
 
-## 2. TetrisGame.
+## 2-1. TetrisGame.
 ---
 
 ### 1단계 [코드참조](https://github.com/malvr00/V-Cplusplus-review/blob/master/tetrisGame/tetrisGameDlg.cpp)
