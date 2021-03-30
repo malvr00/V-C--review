@@ -4,7 +4,7 @@
 >   > 1단계를 기준으로 단계별로 기능을 추가할 계획이다.
 
 ## 1. PuzzleGame.
----
+
 ### 1단계 [코드참조](https://github.com/malvr00/V-Cplusplus-review/tree/master/puzzleGame)
   
 * 초기 실행 화면 모습이다.  
@@ -22,7 +22,7 @@
 ---
 
 ## 2-1. TetrisGame.
----
+
 
 ### 1단계 [코드참조](https://github.com/malvr00/V-Cplusplus-review/blob/master/tetrisGame/tetrisGameDlg.cpp)
 
