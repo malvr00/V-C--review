@@ -22,4 +22,18 @@
 ---
 
 ## 2. TetrisGame.
-  > 현재미완성
+---
+
+### 1단계 [코드참조](https://github.com/malvr00/V-Cplusplus-review/blob/master/tetrisGame/tetrisGameDlg.cpp)
+
+* 초기 실행 화면 모습이다.
+      <img src="https://user-images.githubusercontent.com/77275513/112959684-a3815100-917e-11eb-9d5c-a72a59b26a5d.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>   
+
+* 게임시작 클릭 후 블럭이 떨어지고 떨어질때 마다 1점씩 점수가 증가한다. 상단에는 다음 블럭을 표시한다.
+      <img src="https://user-images.githubusercontent.com/77275513/112959957-e93e1980-917e-11eb-834c-fc2161ffec1d.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>   
+
+* 블럭을 1줄 완성하면 10점이 추가되고 완성된 줄은 삭제된다.
+      <img src="https://user-images.githubusercontent.com/77275513/112960107-125eaa00-917f-11eb-9c99-b61dc08e1e35.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>   
+---
+## 2-2. TetrisGame Multi 2인 (Sokect 활용)
+> 현재 미완성
