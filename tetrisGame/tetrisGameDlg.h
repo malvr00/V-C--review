@@ -38,9 +38,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CBitmap m_bmBlock;					// Block BitMap 저장
-	CBitmap m_bmBack;					// 배경그림 ButMap 저장
+	CBitmap m_bmBack;					// 배경그림 BitMap 저장
+	CBitmap m_bmNumber;					// 점수표시 BitMap 저장
 	CDC m_BackDC;						// Back 저장 할 MemoryDC
 	CDC m_BlockDC;						// Block 저장 할 MemoryDC
+	CDC m_NumberDC;						// 점수표시 저장할 MemoryDC
 	CDC* m_pDC;							// DC 저장 Pointer
 	char m_Table[ROW_CNT][COL_CNT];		// 화면 Table[열수][행수]
 	CRect m_nextRect;					// 다음그림 나타나는 사각형위치
@@ -70,4 +72,8 @@ public:
 	afx_msg void OnClickedExitButton3();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	int m_nNextPattern;					// 다음 패턴
+	int m_nScore;						// 점수 계산
+	void DisplayScore(int nScore);		// 점수표시
+	void NextBlock(bool bFlag);			// 다음 블럭 표시
 };

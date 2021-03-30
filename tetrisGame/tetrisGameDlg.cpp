@@ -30,6 +30,14 @@ POINT Pattern[7][16] = {
 		{ 0, 0 }, { -1, 0 }, { 1, 0 }, { 0, -1 },     { 0, 0 }, { -1, 0 }, { 0, -1 }, { 0, 1 } }
 };
 
+POINT nextPattern[7][4] = {
+	{	{-1, 0},{0,0},{-1,1},{0,1}		},
+	{	{-1,1}, {0,1},{1,1}, {-2,1}		},
+	{	{0,1},{-1,1},{0,0},{1,0}		},
+	{	{0,1},{-1,0},{0,0},{1,1}		},
+	{	{-1,1},{-1,0},{0,1},{1,1}		},
+	{	{1,1},{0,1},{-1,1},{1,0}		},
+	{	{0,1},{-1,1},{1,1},{0,0}		} };
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
 class CAboutDlg : public CDialogEx
@@ -77,7 +85,7 @@ CtetrisGameDlg::CtetrisGameDlg(CWnd* pParent /*=nullptr*/)
 	m_nRot = 0;
 	m_bStart = FALSE;
 	m_nBitType = 4;
-	
+
 	// 게임진행 할 화면 지정
 	m_mainRect.left = START_X;
 	m_mainRect.top = START_Y;
@@ -88,7 +96,11 @@ CtetrisGameDlg::CtetrisGameDlg(CWnd* pParent /*=nullptr*/)
 	m_nextRect.left = START_X + BLOCK_SIZE * COL_CNT + 20;
 	m_nextRect.top = START_Y + 30;
 	m_nextRect.right = m_nextRect.left + 130;
-	m_nextRect.bottom = m_nextRect.top = 80;
+	m_nextRect.bottom = m_nextRect.top + 80;
+	//next Block No 초기화
+	m_nNextPattern = 0;
+	// 점수 초기화
+	m_nScore = 0;
 }
 
 void CtetrisGameDlg::DoDataExchange(CDataExchange* pDX)
@@ -155,6 +167,11 @@ BOOL CtetrisGameDlg::OnInitDialog()
 	m_bmBack.LoadBitmap(IDB_BACK);
 	m_BackDC.CreateCompatibleDC(m_pDC);
 	m_BackDC.SelectObject(&m_bmBack);
+
+	// Number bitmap Load
+	m_bmNumber.LoadBitmap(IDB_NUMBER);
+	m_NumberDC.CreateCompatibleDC(m_pDC);
+	m_NumberDC.SelectObject(&m_bmNumber);
 
 	srand((unsigned)time(NULL));
 	m_ctrlStartBt.EnableWindow(TRUE);
@@ -238,6 +255,8 @@ void CtetrisGameDlg::DrawScr()
 			}
 		}
 	}
+	DisplayScore(m_nScore);
+	NextBlock(m_bStart);
 }
 
 
@@ -265,7 +284,16 @@ void CtetrisGameDlg::DrawBlock(bool bFlag)
 {
 	// TODO: 여기에 구현 코드 추가.
 	for (int i = 0; i < 4; i++) {
-		m_pDC->BitBlt(START_X + 2 + (m_nX + Pattern[m_nPattern][i + m_nRot * 4].x))
+		if (bFlag) {
+			m_pDC->BitBlt(START_X + 2 + (m_nX + Pattern[m_nPattern][i + m_nRot * 4].x) * BLOCK_SIZE,
+				START_Y + 2 + (m_nY + Pattern[m_nPattern][i + m_nRot * 4].y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+				&m_BlockDC, m_nPattern * BLOCK_SIZE, m_nBitType * BLOCK_SIZE, SRCCOPY);
+		}
+		else {
+			m_pDC->BitBlt(START_X + 2 + (m_nX + Pattern[m_nPattern][i + m_nRot * 4].x) * BLOCK_SIZE,
+				START_Y + 2 + (m_nY + Pattern[m_nPattern][i + m_nRot * 4].y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+				&m_BackDC, (m_nX + Pattern[m_nPattern][i + m_nRot * 4].x) * BLOCK_SIZE, (m_nY + Pattern[m_nPattern][i + m_nRot * 4].y) * BLOCK_SIZE, SRCCOPY);
+		}
 	}
 }
 
@@ -273,44 +301,142 @@ void CtetrisGameDlg::DrawBlock(bool bFlag)
 BOOL CtetrisGameDlg::BlockDown()
 {
 	// TODO: 여기에 구현 코드 추가.
-	return 0;
+
+	// 아래로 한 칸 내린 경우 이미 채워진 블럭을 만나면
+	if (!IsAround(m_nX, m_nY + 1)) {
+		SetTable();
+		return FALSE;
+	}
+	DrawBlock(FALSE);
+	m_nY++;
+	DrawBlock(TRUE);
+	m_nScore++;
+	DisplayScore(m_nScore);
+	return TRUE;
 }
 
 
 BOOL CtetrisGameDlg::IsAround(int nX, int nY)
 {
 	// TODO: 여기에 구현 코드 추가.
-	return 0;
+
+	int i, row, col;
+	for (i = 0; i < 4; i++) {
+		col = nX + Pattern[m_nPattern][i + m_nRot * 4].x;
+		row = nY + Pattern[m_nPattern][i + m_nRot * 4].y;
+		// 이동할 위치가 경계를 벗어나면 거짓
+		if (col < 0 || col > COL_CNT - 1 || row < 1 || row > ROW_CNT - 1) {
+			return FALSE;
+		}
+		// 이동할 위치에 이미 블럭이 있으면 거짓
+		if (m_Table[row][col] != -1) {
+			return FALSE;
+		}
+	}
+	return TRUE;
 }
 
 
 void CtetrisGameDlg::SetTable()
 {
 	// TODO: 여기에 구현 코드 추가.
+	int i, row, col, sw;
+
+	// 현재 위치에 블록을 쌓음
+	for (i = 0; i < 4; i++) {
+		m_Table[m_nY + Pattern[m_nPattern][i + m_nRot * 4].y][m_nX + Pattern[m_nPattern][i + m_nRot * 4].x] = m_nPattern;
+	}
+	
+	// 다채 워진 행은 지움, 가장아래부터 전부 비교.
+	for (row = ROW_CNT - 1; row >= 0; row--) {
+		sw = 0;
+		for (col = 0; col < COL_CNT; col++) {
+			if (m_Table[row][col] == -1)
+				sw = -1;
+		}
+		// 현재 행 다 채워졌으면
+		if (sw == 0) {
+			for (i = row; i > 0; i--) {
+				for (col = 0; col < COL_CNT; col++) {
+					// 한행 아래로 내리기
+					m_Table[i][col] = m_Table[i - 1][col];
+				}
+			}
+			for (col = 0; col < COL_CNT; col++) {
+				m_pDC->BitBlt(START_X + 2 + col * BLOCK_SIZE, START_Y + 2 + row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE,
+					&m_BackDC, col * BLOCK_SIZE, row * BLOCK_SIZE, SRCCOPY);
+				Sleep(20);
+			}
+			// 다 채워지면 10점
+			m_nScore += 10;
+			DisplayScore(m_nScore);
+
+			DrawScr();
+			Sleep(100);
+
+			//내려온 행 다시검사
+			row++; 
+		}
+	}
+	m_nX = COL_CNT / 2;
+	m_nY = 1;
+	m_nPattern = m_nNextPattern;
+	NextBlock(FALSE);
+	m_nNextPattern = rand() % 7;
+	NextBlock(TRUE);
+	m_nRot = 1;
+	if (!IsAround(m_nX, m_nY + 1)) {
+		KillTimer(1);
+		MessageBox(_T("으악"));
+		m_ctrlStartBt.EnableWindow(TRUE);
+		m_ctrlStopBt.EnableWindow(FALSE);
+		return;
+	}
 }
 
 
 void CtetrisGameDlg::RolateBlock(bool bFlag)
 {
 	// TODO: 여기에 구현 코드 추가.
+	int nRot = m_nRot;
+	DrawBlock(FALSE);
+	if (++m_nRot > 3)
+		m_nRot = 0;
+	// 이동할 수 없으면 원위치
+	if (!IsAround(m_nX, m_nY))
+		m_nRot = nRot;
+	DrawBlock(TRUE);
 }
 
 
 void CtetrisGameDlg::MoveDown()
 {
 	// TODO: 여기에 구현 코드 추가.
+	while (BlockDown()) {
+		Sleep(30);
+	}
 }
 
 
 void CtetrisGameDlg::MoveRight()
 {
 	// TODO: 여기에 구현 코드 추가.
+	if (!IsAround(m_nX + 1, m_nY))
+		return;
+	DrawBlock(FALSE);
+	m_nX++;
+	DrawBlock(TRUE);
 }
 
 
 void CtetrisGameDlg::MoveLeft()
 {
 	// TODO: 여기에 구현 코드 추가.
+	if (!IsAround(m_nX - 1, m_nY))
+		return;
+	DrawBlock(FALSE);
+	m_nX--;
+	DrawBlock(TRUE);
 }
 
 
@@ -345,7 +471,7 @@ void CtetrisGameDlg::OnClickedExitButton3()
 void CtetrisGameDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
+	BlockDown();
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -353,6 +479,70 @@ void CtetrisGameDlg::OnTimer(UINT_PTR nIDEvent)
 BOOL CtetrisGameDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
+		return TRUE;
+	if (pMsg->message == WM_KEYDOWN && m_bStart) {
+		switch (pMsg->wParam) {
+		case VK_LEFT:
+			MoveLeft();
+			return TRUE;
+		case VK_RIGHT:
+			MoveRight();
+			return TRUE;
+		case VK_DOWN:
+			BlockDown();
+			return TRUE;
+		case VK_UP:
+			RolateBlock(FALSE);
+			return TRUE;
+		case VK_SPACE:
+		case VK_RETURN:
+			MoveDown();
+			return TRUE;
+		}
+	}
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CtetrisGameDlg::DisplayScore(int nScore)
+{
+	// TODO: 여기에 구현 코드 추가.
+	int i, temp = nScore;
+	CClientDC dc(this);
+	for (i = 7; i >= 0; i--) {
+		if (temp > 0) {
+			dc.BitBlt(m_nextRect.left + i * 13, m_nextRect.bottom + 70, 13, 23, &m_NumberDC, 0, (temp % 10) * 23, SRCCOPY);
+			temp /= 10;
+		}
+		else {
+			dc.BitBlt(m_nextRect.left + i * 13, m_nextRect.bottom + 70, 13, 23, &m_NumberDC, 0, 11*23, SRCCOPY);
+			temp /= 10;
+		}
+	}
+	
+}
+
+
+void CtetrisGameDlg::NextBlock(bool bFlag)
+{
+	// TODO: 여기에 구현 코드 추가.
+	int i, x = 50, y = 10;
+	// 출력 위치 보정
+	if (m_nNextPattern == 0)
+		x = 65;
+	else if (m_nNextPattern == 1)
+		x = 65, y = 0;
+
+	// 참이면 NextBlock을 그리고 거짓이면 지움.
+	if (bFlag) {
+		for (i = 0; i < 4; i++) {
+			m_pDC->BitBlt(m_nextRect.left + x + (nextPattern[m_nNextPattern][i].x) * BLOCK_SIZE,
+				m_nextRect.top + y + (nextPattern[m_nNextPattern][i].y) * BLOCK_SIZE,
+				BLOCK_SIZE, BLOCK_SIZE, &m_BlockDC, m_nNextPattern * BLOCK_SIZE, m_nBitType * BLOCK_SIZE, SRCCOPY);
+		}
+	}
+	else {
+		m_pDC->Rectangle(m_nextRect);
+	}
 }
