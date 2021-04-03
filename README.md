@@ -2,9 +2,7 @@
 
 > V/C++ 공부.
 
-## 1. PuzzleGame.
-
-### [코드참조](https://github.com/malvr00/V-Cplusplus-review/tree/master/puzzleGame)
+## 1. PuzzleGame. [코드참조](https://github.com/malvr00/V-Cplusplus-review/tree/master/puzzleGame)
   
 * 초기 실행 화면 모습.  
 
@@ -20,10 +18,7 @@
 
 ---
 
-## 2-1. TetrisGame.
-
-
-### [코드참조](https://github.com/malvr00/V-Cplusplus-review/blob/master/tetrisGame/tetrisGameDlg.cpp)
+## 2-1. TetrisGame. [코드참조](https://github.com/malvr00/V-Cplusplus-review/blob/master/tetrisGame/tetrisGameDlg.cpp)
 
 * 초기 실행 화면 모습.
  
