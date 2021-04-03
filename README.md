@@ -45,4 +45,10 @@
 
 ## 3. Socket 복습
 > java socket 복습 하기전 v/c++ 소켓 복습
->   > 현재 미완성
+>   > Server와 Client 하나로 안만들고 따로따로 만들었다.
+
+### Client Socket [코드참조](https://github.com/malvr00/V-Cplusplus-review/tree/master/CleintSocket)
+* 메세지를 보내면 Server문자가 붙여서 다시 Client소켓으로 보내도록 설계 하였다.
+* Message Receive 부분은 Socket을 상속받아서[코드참조](https://github.com/malvr00/V-Cplusplus-review/blob/master/CleintSocket/CMySocket.h) 사용자 Message 정의 후 사용했다.
+
+     <img src="https://user-images.githubusercontent.com/77275513/113472910-1b15ef80-94a1-11eb-889a-2cb63f4f1bea.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>
