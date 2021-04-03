@@ -47,7 +47,7 @@
 > java socket 복습 하기전 v/c++ 소켓 복습
 >   > Server와 Client 하나로 안만들고 따로따로 만들었다.
 
-### Socket Socket [코드참조]()
+### Server Socket [코드참조](https://github.com/malvr00/V-Cplusplus-review/tree/master/ServerSocket)
 * ClientSocket에서 메세지를 보내면 메세지를 화면에 띄우고, Server: 붙여 ClientSocket에 다시 보낸다.
 * Message Receive는 Client Socket에 만든 클래스를 재사용했고, 새로 Socket을 상속받아 Message Accept를 사용자 Message 정의 후 사용[[코드참조]](https://github.com/malvr00/V-Cplusplus-review/blob/master/ServerSocket/CMyServerSocket.h)
 
