@@ -59,3 +59,9 @@
 * Message Receive 부분은 Socket을 상속받아서[[코드참조]](https://github.com/malvr00/V-Cplusplus-review/blob/master/CleintSocket/CMySocket.h) 사용자 Message 정의 후 사용했다.
 
      <img src="https://user-images.githubusercontent.com/77275513/113472910-1b15ef80-94a1-11eb-889a-2cb63f4f1bea.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>
+
+## Socket Chatting Program (Portfolio용)
+> Chatting Program User 관리 및 서버관리 Socket
+>  > User용 Client Chatting Program Socket
+
+### 현재미완성.
