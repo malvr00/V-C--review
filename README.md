@@ -59,4 +59,4 @@
 >  > User용 Client Chatting Program Socket
 
 * Chatting Program Server [[Repositories]](https://github.com/malvr00/Cplusplus-ChattingProgram)   [코드참조](https://github.com/malvr00/Cplusplus-ChattingProgram/tree/main/ChatServer)
-### 현재미완성.
+### [[이동]](https://github.com/malvr00/Cplusplus-ChattingProgram)
