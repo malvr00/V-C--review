@@ -34,7 +34,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	CMyServerSocket m_Server;			// Server Socket
-	CMySocket m_Client;					// Client Socket
+	CMySocket m_Client;				// Client Socket
 public:
 	afx_msg void OnClickedStartBt();
 	afx_msg void OnClickedStopBt();
