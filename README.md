@@ -33,9 +33,6 @@
      <img src="https://user-images.githubusercontent.com/77275513/112960107-125eaa00-917f-11eb-9c99-b61dc08e1e35.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>
       
 ---
-## 2-2. TetrisGame Multi 2인 (Sokect 활용)
-> 현재 미완성
----
 
 ## 3. Socket 복습
 > java socket 복습 하기 전 v/c++ 소켓 복습
