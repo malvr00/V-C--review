@@ -16,7 +16,6 @@
 
      <img src="https://user-images.githubusercontent.com/77275513/112714335-45096800-8f1d-11eb-9826-f287a9578255.PNG" width="450px" height="300px" title="100px" alt="RubberDuck"></img><br/>
 
----
 
 ## 2-1. TetrisGame. [[코드참조]](https://github.com/malvr00/V-Cplusplus-review/blob/master/tetrisGame/tetrisGameDlg.cpp)
 
